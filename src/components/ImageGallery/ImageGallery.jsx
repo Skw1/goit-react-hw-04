@@ -1,14 +1,18 @@
-const ImageGallery = ({ images, onImageClick }) => {
+// ImageGallery.jsx
+import css from "./ImageGallery.module.css";
+import ImageModal from "../ImageModal/ImageModal.jsx";
+
+const ImageGallery = ({ pictures }) => {
   return (
-    <ul className="image-gallery">
-      {images.map((image) => (
-        <li key={image.id}>
-          <div onClick={() => onImageClick(image)}>
-            <img src={image.urls.small} alt={image.alt_description} />
-          </div>
-        </li>
-      ))}
-    </ul>
+    <div className={css.galleryContainer}>
+      <ul className={css.galleryList}>
+        {pictures.map((picture) => (
+          <li key={picture.id} className={css.galleryItem}>
+            <ImageModal picture={picture} />
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 };
 

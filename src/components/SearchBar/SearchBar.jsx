@@ -1,34 +1,43 @@
-import { useState } from 'react';
-import css from './SearchBar.module.css';
+import { Component } from 'react';
 import { toast } from 'react-hot-toast';
+import css from './SearchBar.module.css';
 
-const SearchBar = ({ onSubmit }) => {
-  const [query, setQuery] = useState('');
+class SearchBar extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      query: ''
+    };
+  }
 
-  const handleSubmit = (e) => {
+  handleSubmit = (e) => {
     e.preventDefault();
+    const { query } = this.state;
     if (!query.trim()) {
       toast.error('Please enter a search term');
       return;
     }
-    onSubmit(query);
-    setQuery('');
+    this.props.onSearch(query); 
+    this.setState({ query: '' });
   };
 
-  return (
-      <form className = {css.searchForm} onSubmit={handleSubmit}>
+  render() {
+    const { query } = this.state;
+    return (
+      <form className={css.searchForm} onSubmit={this.handleSubmit}>
         <input
-        className = {css.input}
+          className={css.input}
           type="text"
           autoComplete="off"
           autoFocus
           placeholder="Search images and photos"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => this.setState({ query: e.target.value })}
         />
-        <button className ={css.searchBtn} type="submit">Search</button>
+        <button className={css.searchBtn} type="submit">Search</button>
       </form>
-  );
-};
+    );
+  }
+}
 
 export default SearchBar;

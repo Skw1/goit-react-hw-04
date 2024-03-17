@@ -1,80 +1,63 @@
 // App.jsx
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Toaster } from 'react-hot-toast';
+
+import fetchImages from '../../fetchApi.js';
+
 import SearchBar from '../SearchBar/SearchBar.jsx';
 import ImageGallery from '../ImageGallery/ImageGallery.jsx';
-import Loader from '../Loader/Loader.jsx';
-import ErrorMessage from '../ErrorMessage/ErrorMessage.jsx';
 import LoadMoreBtn from '../LoadMoreBtn/LoadMoreBtn.jsx';
-import ImageModal from '../ImageModal/ImageModal.jsx';
-import { fetchImages } from '../../fetchApi.js';
-
-
 
 const App = () => {
   const [query, setQuery] = useState('');
-  const [images, setImages] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [pictures, setPictures] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [showLoadMore, setShowLoadMore] = useState(false); 
 
-  const handleSubmit = (searchQuery) => {
-    setQuery(searchQuery);
-    setImages([]);
+  const handleSearchCard = async (newQuery) => {
+    setQuery(newQuery);
     setPage(1);
+    setPictures([]);
+    setLoading(false);
+    setError(false);
+    setShowLoadMore(false);
   };
 
-  const fetchMoreImages = async () => {
-    try {
-      setLoading(true);
-      const newImages = await fetchImages(query, page + 1);
-      setImages((prevImages) => [...prevImages, ...newImages]);
-      setPage((prevPage) => prevPage + 1);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
+  const handleLoadMore = () => {
+    setPage((prevPage) => prevPage + 1);
   };
 
   useEffect(() => {
-    const getImages = async () => {
-      if (!query) return;
+    if (query === '') {
+      return;
+    }
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const fetchedImages = await fetchImages(query);
-        setImages(fetchedImages);
+        const response = await fetchImages(query, page);
+        setError(false);
+        setPictures((photos) => [...photos, ...response]);
+        setShowLoadMore(true); 
       } catch (error) {
-        setError(error.message);
+        setError(true);
       } finally {
         setLoading(false);
       }
     };
-
-    getImages();
-  }, [query]);
-
-  const handleImageClick = (image) => {
-    setSelectedImage(image);
-  };
-
-  const closeModal = () => {
-    setSelectedImage(null);
-  };
+    fetchData();
+  }, [query, page]);
 
   return (
-    <div className="container">
-      <SearchBar onSubmit={handleSubmit} />
-      {loading && <Loader />}
-      {error && <ErrorMessage message={error} />}
-      {images.length > 0 && (
-        <>
-          <ImageGallery images={images} onImageClick={handleImageClick} />
-          <LoadMoreBtn onClick={fetchMoreImages} />
-        </>
-      )}
-      {selectedImage && <ImageModal image={selectedImage} onClose={closeModal} />}
-    </div>
+    <>
+      <SearchBar onSearch={handleSearchCard} /> 
+      {error && <p>Error, please try reloading</p>}
+      <ImageGallery pictures={pictures} />
+      {loading && <p>Loading articles, please wait...</p>}
+      {showLoadMore && <LoadMoreBtn onClick={handleLoadMore} />} 
+      <Toaster position='top-right' />
+    </>
   );
 };
 

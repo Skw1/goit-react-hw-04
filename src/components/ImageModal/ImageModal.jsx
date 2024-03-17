@@ -1,16 +1,36 @@
+// ImageModal.jsx
+import React, { useState } from 'react';
 import ReactModal from 'react-modal';
+import ImageCard from '../ImageCard/ImageCard';
+import css from './ImageModal.module.css';
 
-const ImageModal = ({ image, isOpen, onRequestClose }) => {
+const ImageModal = ({ picture }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const openModal = () => {
+    setIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsOpen(false);
+  };
+
   return (
-    <ReactModal isOpen={isOpen} onRequestClose={onRequestClose}>
-      <div>
-        <img src={image.urls.regular} alt={image.alt_description} />
-        <p>Author: {image.user.username}</p>
-        <p>Likes: {image.likes}</p>
-        {/* Add more details if needed */}
-        <button onClick={onRequestClose}>Close</button>
-      </div>
-    </ReactModal>
+    <>
+      <button onClick={openModal}>
+        <ImageCard picture={picture} />
+      </button>
+
+      <ReactModal
+        isOpen={isOpen}
+        contentLabel="Modal"
+        onRequestClose={closeModal}
+        className={css.imageModal}
+        overlayClassName={css.modalOverlay}
+      >
+        <img onClick={closeModal} src={picture.urls.regular} alt={picture.description} className={css.image} />
+      </ReactModal>
+    </>
   );
 };
 
